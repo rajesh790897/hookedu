@@ -6,30 +6,40 @@ import database from "./src/config/database.js";
 import { root, register } from "./src/routes/users.js";
 import { feed } from "./src/routes/feed.js";
 
-// loads environment variables
+// Load environment variables
 dotenv.config();
 
 const app = express();
-const corsOptions = { credentials: true, origin: "http://localhost:3000" };
+const PORT = 5001;
+const corsOptions = { 
+  credentials: true, 
+  origin: "http://localhost:3000" 
+};
 
-// database authentication
-try {
-  await database.authenticate();
-  console.log("Database Connected...");
-} catch (error) {
-  console.log(error);
-}
+// Authenticate and connect to the database
+(async () => {
+  try {
+    await database.authenticate();
+    console.log("Database connected successfully.");
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
+  }
+})();
 
-// parsers: cookies, json, request_body
+// Middleware: Parse cookies, JSON, and URL-encoded data
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// allow CORS
+
+// Middleware: Enable CORS
 app.use(cors(corsOptions));
 
-// route_handlers
+// Route handlers
 app.use("/", root);
 app.use("/hook", register);
 app.use("/api/feed", feed);
 
-app.listen(5001, () => console.log("hookedu: Server Running on Port 5001..."));
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
